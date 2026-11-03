@@ -25,6 +25,14 @@ if ! git rev-parse --is-inside-work-tree &>/dev/null; then
   exit 0
 fi
 
+# [fork patch 2026-09-17] 削除ガード: 作業ツリーで大量に消えていたら自動コミットしない。
+# 同期事故で消えたファイルを git add -A が拾い、push で全端末から消えるのを防ぐ。
+# 判定本体は vault 側（ops/scripts/git-deletion-guard.sh）。無ければ従来どおり通す。
+# nov193/arscontexta フォークに入れたので、プラグインを更新しても残る。
+if [ -f "ops/scripts/git-deletion-guard.sh" ]; then
+  bash "ops/scripts/git-deletion-guard.sh" || exit 0
+fi
+
 # Stage all changes
 git add -A 2>/dev/null || exit 0
 
